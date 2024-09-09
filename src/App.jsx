@@ -1,51 +1,51 @@
-import { useState, useEffect } from 'react'
-import './styles.css'
-import examplePixels2 from './examples/examplePixels2'
+import { useState, useEffect } from "react";
+import "./styles.css";
+import examplePixels2 from "./examples/examplePixels2";
 
 export default function App() {
-  const [pixels, setPixels] = useState([])
-  const [mouseDown, setMouseDown] = useState(false)
-  const [wantsToDraw, setWantsToDraw] = useState(true)
-  const [resetRequested, setResetRequested] = useState(false)
+  const [pixels, setPixels] = useState([]);
+  const [mouseDown, setMouseDown] = useState(false);
+  const [wantsToDraw, setWantsToDraw] = useState(true);
+  const [resetRequested, setResetRequested] = useState(false);
 
   useEffect(() => {
     const initialPixels = new Array(3600)
-      .fill('')
-      .map(() => ({ id: crypto.randomUUID(), filled: false }))
-    setPixels(initialPixels)
-  }, [])
+      .fill("")
+      .map(() => ({ id: crypto.randomUUID(), filled: false }));
+    setPixels(initialPixels);
+  }, []);
 
   function reset() {
-    setResetRequested(true)
+    setResetRequested(true);
   }
 
   function togglePencil() {
-    setWantsToDraw((pre) => !pre)
+    setWantsToDraw((pre) => !pre);
   }
 
   useEffect(() => {
-    let timeoutOne
-    let timeoutTwo
+    let timeoutOne;
+    let timeoutTwo;
 
     if (resetRequested) {
       timeoutOne = setTimeout(() => {
         setPixels((prevPixels) =>
           prevPixels.map((pixel) => ({ ...pixel, filled: false }))
-        )
-      }, 1000)
+        );
+      }, 1000);
     }
 
     if (resetRequested) {
       timeoutTwo = setTimeout(() => {
-        setResetRequested(false)
-      }, 1001)
+        setResetRequested(false);
+      }, 1001);
     }
 
     return () => {
-      clearTimeout(timeoutOne)
-      clearTimeout(timeoutTwo)
-    }
-  }, [resetRequested])
+      clearTimeout(timeoutOne);
+      clearTimeout(timeoutTwo);
+    };
+  }, [resetRequested]);
   /* Challenge 
     
      1. Kullanıcının imleci "wrapper" div içinde herhangi bir yerde aşağı veya yukarı giderse, "mouseDown" state'i sırasıyla true veya false olarak ayarlanmalıdır. Başka bir deyişle:
@@ -71,33 +71,48 @@ export default function App() {
     4. Yalnızca aşağıdaki koda ekleme yapmalısınız. Bu veya başka bir dosyada başka hiçbir şeyin değiştirilmesine gerek yok
 */
 
+  function handleMouseEnter(id) {
+    if (mouseDown) {
+      setPixels((prev) =>
+        prev.map((pixel) =>
+          pixel.id === id ? { ...pixel, filled: wantsToDraw } : pixel
+        )
+      );
+    }
+  }
+
   const pixelElements = pixels.map((pixel) => (
     <div
       key={pixel.id}
       id={pixel.id}
-      className={`pixel ${pixel.filled ? 'filled' : 'empty'}`}
+      className={`pixel ${pixel.filled ? "filled" : "empty"}`}
+      onMouseEnter={() => handleMouseEnter(pixel.id)}
     ></div>
-  ))
+  ));
 
   return (
-    <div className='wrapper'>
+    <div
+      className="wrapper"
+      onMouseDown={() => setMouseDown(true)}
+      onMouseUp={() => setMouseDown(false)}
+    >
       <div
         className={`sketch-o-matic-container ${
-          resetRequested && 'shake-horizontal'
+          resetRequested && "shake-horizontal"
         }`}
       >
         <h1>Eskiz-a-Matik</h1>
         <div
-          className={`canvas ${wantsToDraw ? 'draw' : 'erase'} 
-                               ${resetRequested && 'fade-out'}`}
+          className={`canvas ${wantsToDraw ? "draw" : "erase"} 
+                               ${resetRequested && "fade-out"}`}
         >
           {pixelElements}
         </div>
-        <div className='button-container'>
+        <div className="button-container">
           <button onClick={reset}>Reset</button>
-          <button onClick={togglePencil}>{wantsToDraw ? 'Çiz' : 'Sil'}</button>
+          <button onClick={togglePencil}>{wantsToDraw ? "Çiz" : "Sil"}</button>
         </div>
       </div>
     </div>
-  )
+  );
 }
